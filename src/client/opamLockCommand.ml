@@ -166,10 +166,13 @@ let lock_opam ?(only_direct=false) st opam =
   in
   (* variables are set here as a string *)
   let dev_depends_map =
-    select_depends "dev" (select ~dev:true ~build:true () -- select ~build:true ())
+    select_depends "dev" (
+        select ~dev:true ~build:true () -- select ~build:true ()
+    )
   in
-  let test_depends_map = select_depends "with-test" (select ~test:true ()) in
-  let doc_depends_map = select_depends "with-doc" (select ~doc:true ()) in
+  let selector = select ~test:true in
+  let test_depends_map = select_depends "with-test" (selector ()) in
+  let doc_depends_map = select_depends "with-doc" (selector ()) in
   let depends =
     let f a b =
       match a,b with
@@ -229,7 +232,10 @@ let lock_opam ?(only_direct=false) st opam =
   let all_depopts =
     OpamFormula.packages st.packages
       (OpamFilter.filter_deps
-         ~build:true ~test:true ~doc:true ~dev:true ~default:true ~post:false
+         ~build:true
+         ~test:true
+         ~doc:true
+         ~dev:true ~default:true ~post:false
          (OpamFile.OPAM.depopts opam))
   in
   let installed_depopts = OpamPackage.Set.inter all_depopts st.installed in

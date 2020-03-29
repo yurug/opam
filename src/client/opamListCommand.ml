@@ -151,7 +151,9 @@ let package_dependencies st tog nv =
   get_opam st nv |>
   OpamPackageVar.all_depends
     ~build:tog.build ~post:tog.post
-    ~test:tog.test ~doc:tog.doc ~dev:tog.dev
+    ~test:tog.test
+    ~doc:tog.doc
+    ~dev:tog.dev
     ~depopts:tog.depopts
     st
 
@@ -169,7 +171,9 @@ let get_universe st ?requested tog =
     | None -> OpamPackage.names_of_packages st.packages
   in
   OpamSwitchState.universe st
-    ~test:tog.test ~doc:tog.doc ~force_dev_deps:tog.dev
+    ~test:(if tog.test then Full else Inactive)
+    ~doc:(if tog.doc then Full else Inactive)
+    ~force_dev_deps:tog.dev
     ~requested Query
 
 let rec value_strings value =

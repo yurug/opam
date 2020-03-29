@@ -128,8 +128,8 @@ let is_dev_package st opam =
 let filter_depends_formula
     ?(build=true)
     ?(post=false)
-    ?(test=OpamStateConfig.(!r.build_test))
-    ?(doc=OpamStateConfig.(!r.build_doc))
+    ?(test=OpamStateConfig.(!r.build_test <> Inactive))
+    ?(doc=OpamStateConfig.(!r.build_doc <> Inactive))
     ?(dev=false)
     ?default
     ~env

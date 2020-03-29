@@ -376,6 +376,12 @@ type 'a optional = {
   optional: bool; (** Is the contents optional *)
 }
 
+(** Multiscope option. *)
+type multiscope_option =
+| Full           (* This option is activated for all built packages.      *)
+| OnlyRequested  (* This option is only activated for requested packages. *)
+| Inactive       (* This option is not activated.                         *)
+
 (** Upgrade statistics *)
 type stats = {
   s_install  : int;

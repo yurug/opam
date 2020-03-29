@@ -16,8 +16,8 @@ type t = {
   switch_from: [ `Env | `Command_line | `Default ];
   jobs: int Lazy.t;
   dl_jobs: int;
-  build_test: bool;
-  build_doc: bool;
+  build_test: multiscope_option;
+  build_doc: multiscope_option;
   dryrun: bool;
   makecmd: string Lazy.t;
   ignore_constraints_on: name_set;
@@ -34,8 +34,8 @@ let default = {
   switch_from = `Default;
   jobs = lazy (max 1 (OpamSysPoll.cores () - 1));
   dl_jobs = 3;
-  build_test = false;
-  build_doc = false;
+  build_test = Inactive;
+  build_doc = Inactive;
   dryrun = false;
   makecmd = lazy OpamStd.Sys.(
       match os () with
@@ -54,8 +54,8 @@ type 'a options_fun =
   ?switch_from:[ `Env | `Command_line | `Default ] ->
   ?jobs:(int Lazy.t) ->
   ?dl_jobs:int ->
-  ?build_test:bool ->
-  ?build_doc:bool ->
+  ?build_test:multiscope_option ->
+  ?build_doc:multiscope_option ->
   ?dryrun:bool ->
   ?makecmd:string Lazy.t ->
   ?ignore_constraints_on:name_set ->
@@ -111,14 +111,23 @@ let initk k =
     | Some "" | None -> None, None
     | Some s -> Some (OpamSwitch.of_string s), Some `Env
   in
+  let multiscope_option_from_env =
+    OpamStd.Option.map (function true -> OnlyRequested | _ -> Inactive)
+  in
+  let build_test =
+    multiscope_option_from_env (env_bool "WITHTEST" ++ env_bool "BUILDTEST")
+  in
+  let build_doc =
+    multiscope_option_from_env (env_bool "WITHDOC" ++ env_bool "BUILDDOC")
+  in
   setk (setk (fun c -> r := c; k)) !r
     ?root_dir:(env_string "ROOT" >>| OpamFilename.Dir.of_string)
     ?current_switch
     ?switch_from
     ?jobs:(env_int "JOBS" >>| fun s -> lazy s)
     ?dl_jobs:(env_int "DOWNLOADJOBS")
-    ?build_test:(env_bool "WITHTEST" ++ env_bool "BUILDTEST")
-    ?build_doc:(env_bool "WITHDOC" ++ env_bool "BUILDDOC")
+    ?build_test
+    ?build_doc
     ?dryrun:(env_bool "DRYRUN")
     ?makecmd:(env_string "MAKECMD" >>| fun s -> lazy s)
     ?ignore_constraints_on:

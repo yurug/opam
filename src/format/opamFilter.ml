@@ -587,7 +587,8 @@ let deps_var_env ~build ~post ?test ?doc ?dev var =
   | _ -> None
 
 let filter_deps ~build ~post ?test ?doc ?dev ?default_version ?default deps =
-  filter_formula ?default_version ?default (deps_var_env ~build ~post ?test ?doc ?dev) deps
+  filter_formula ?default_version ?default
+    (deps_var_env ~build ~post ?test ?doc ?dev) deps
 
 let rec simplify_extended_version_formula ef =
   let to_pure ef =

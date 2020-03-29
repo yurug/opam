@@ -75,3 +75,9 @@ val all_package_flags: package_flag list
 (** Map on a solver result *)
 val map_success: ('a -> 'b) -> ('a,'fail) result -> ('b,'fail) result
 val iter_success: ('a -> unit) -> ('a, 'b) result -> unit
+
+(** [package_option package requested multiscope_option] returns the
+    boolean interpretation of a multiscope option depending for
+    [package] given the set of [requested] packages. *)
+val package_option:
+  OpamPackage.t -> OpamPackage.Set.t -> multiscope_option -> bool

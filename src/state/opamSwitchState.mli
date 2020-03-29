@@ -168,8 +168,8 @@ val conflicts_with: 'a switch_state -> package_set -> package_set -> package_set
     [switch_state.reinstall] that are present in [requested]. *)
 val universe:
   'a switch_state ->
-  ?test:bool ->
-  ?doc:bool ->
+  ?test:multiscope_option ->
+  ?doc:multiscope_option ->
   ?force_dev_deps:bool ->
   ?reinstall:package_set ->
   requested:name_set ->

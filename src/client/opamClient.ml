@@ -1180,8 +1180,8 @@ let check_installed t atoms =
     OpamPackage.to_map
       (OpamFormula.packages_of_atoms available atoms)
   in
-  let test = OpamStateConfig.(!r.build_test) in
-  let doc = OpamStateConfig.(!r.build_doc) in
+  let test = OpamStateConfig.(!r.build_test) <> Inactive in
+  let doc = OpamStateConfig.(!r.build_doc) <> Inactive in
   let env p =
     OpamFilter.deps_var_env ~build:true ~post:true ~test ~doc
       ~dev:(OpamSwitchState.is_dev_package t p)

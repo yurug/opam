@@ -662,9 +662,9 @@ let universe st
       | "dev" ->
         Some (B (force_dev_deps || is_dev_package st nv))
       | "with-test" ->
-        Some (B (test && OpamPackage.Set.mem nv requested_allpkgs))
+        Some (B (OpamTypesBase.package_option nv requested_allpkgs test))
       | "with-doc" ->
-        Some (B (doc && OpamPackage.Set.mem nv requested_allpkgs))
+        Some (B (OpamTypesBase.package_option nv requested_allpkgs doc))
       | _ -> None (* Computation delayed to the solver *)
     else
     let r = OpamPackageVar.resolve_switch ~package:nv st v in

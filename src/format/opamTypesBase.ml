@@ -193,3 +193,9 @@ let map_success f = function
 let iter_success f = function
   | Success x -> f x
   | Conflicts _ -> ()
+
+let package_option nv requested f =
+  match f with
+  | Inactive -> false
+  | OnlyRequested -> OpamPackage.Set.mem nv requested
+  | Full -> true

@@ -363,7 +363,6 @@ let parallel_apply t ~requested ?add_roots ~assume_built ?(force_remove=false)
   in
 
   (* 1/ process the package actions (fetch, build, installations and removals) *)
-
   let action_graph = (* Add build actions *)
     let noop_remove nv =
       OpamAction.noop_remove_package t nv in
@@ -480,12 +479,9 @@ let parallel_apply t ~requested ?add_roots ~assume_built ?(force_remove=false)
             OpamFilename.rmdir dir;
           false, dir
       in
-      let test =
-        OpamStateConfig.(!r.build_test) && OpamPackage.Set.mem nv requested
-      in
-      let doc =
-        OpamStateConfig.(!r.build_doc) && OpamPackage.Set.mem nv requested
-      in
+      let flag = OpamTypesBase.package_option nv requested in
+      let test = flag OpamStateConfig.(!r.build_test) in
+      let doc = flag OpamStateConfig.(!r.build_doc) in
       (if OpamFilename.exists_dir source_dir
        then (if not is_inplace then
                OpamFilename.copy_dir ~src:source_dir ~dst:build_dir)
@@ -497,12 +493,9 @@ let parallel_apply t ~requested ?add_roots ~assume_built ?(force_remove=false)
          | Some exn -> store_time (); Done (`Exception exn)
          | None -> store_time (); Done (`Successful (installed, removed)))
     | `Install nv ->
-      let test =
-        OpamStateConfig.(!r.build_test) && OpamPackage.Set.mem nv requested
-      in
-      let doc =
-        OpamStateConfig.(!r.build_doc) && OpamPackage.Set.mem nv requested
-      in
+      let flag = OpamTypesBase.package_option nv requested in
+      let test = flag OpamStateConfig.(!r.build_test) in
+      let doc = flag OpamStateConfig.(!r.build_doc) in
       let build_dir = OpamPackage.Map.find_opt nv inplace in
       (OpamAction.install_package t ~test ~doc ?build_dir nv @@+ function
         | None ->

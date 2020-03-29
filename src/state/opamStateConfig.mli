@@ -19,8 +19,8 @@ type t = private {
   switch_from: [ `Env | `Command_line | `Default ];
   jobs: int Lazy.t;
   dl_jobs: int;
-  build_test: bool;
-  build_doc: bool;
+  build_test: multiscope_option;
+  build_doc: multiscope_option;
   dryrun: bool;
   makecmd: string Lazy.t;
   ignore_constraints_on: name_set;
@@ -35,8 +35,8 @@ type 'a options_fun =
   ?switch_from:[ `Env | `Command_line | `Default ] ->
   ?jobs:(int Lazy.t) ->
   ?dl_jobs:int ->
-  ?build_test:bool ->
-  ?build_doc:bool ->
+  ?build_test:multiscope_option ->
+  ?build_doc:multiscope_option ->
   ?dryrun:bool ->
   ?makecmd:string Lazy.t ->
   ?ignore_constraints_on:name_set ->

@@ -372,7 +372,7 @@ let t_lint ?check_extra_files ?(check_upstream=false) ?(all=false) t =
     (let dup_depends =
        OpamPackage.Name.Set.inter
          (names_of_formula false t.depends)
-         (names_of_formula true t.depopts)
+         (names_of_formula false t.depopts)
      in
      cond 31 `Error
        "Fields 'depends' and 'depopts' refer to the same package names"

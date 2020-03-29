@@ -86,8 +86,8 @@ val opam_init:
   ?switch_from:[ `Command_line | `Default | `Env ] ->
   ?jobs:int Lazy.t ->
   ?dl_jobs:int ->
-  ?build_test:bool ->
-  ?build_doc:bool ->
+  ?build_test:OpamTypes.multiscope_option ->
+  ?build_doc:OpamTypes.multiscope_option ->
   ?dryrun:bool ->
   ?makecmd:string Lazy.t ->
   ?ignore_constraints_on:OpamPackage.Name.Set.t ->

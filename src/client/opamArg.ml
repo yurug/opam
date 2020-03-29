@@ -150,8 +150,8 @@ type build_options = {
   make          : string option;
   no_checksums  : bool;
   req_checksums : bool;
-  build_test    : bool;
-  build_doc     : bool;
+  build_test    : multiscope_option;
+  build_doc     : multiscope_option;
   show          : bool;
   dryrun        : bool;
   fake          : bool;
@@ -165,16 +165,25 @@ type build_options = {
 
 let create_build_options
     keep_build_dir reuse_build_dir inplace_build make no_checksums
-    req_checksums build_test build_doc show dryrun skip_update
-    fake jobs ignore_constraints_on unlock_base locked lock_suffix = {
-  keep_build_dir; reuse_build_dir; inplace_build; make;
-  no_checksums; req_checksums; build_test; build_doc; show; dryrun;
-  skip_update; fake; jobs; ignore_constraints_on; unlock_base;
-  locked; lock_suffix
-}
+    req_checksums full_flag build_test build_doc show dryrun skip_update
+    fake jobs ignore_constraints_on unlock_base locked lock_suffix =
+  let multiscope flag =
+    match flag, full_flag with
+    | true, true -> Full
+    | true, false -> OnlyRequested
+    | false, _ -> Inactive
+  in
+  let build_doc = multiscope build_doc and build_test = multiscope build_test in
+  {
+    keep_build_dir; reuse_build_dir; inplace_build; make;
+    no_checksums; req_checksums; build_test; build_doc; show; dryrun;
+    skip_update; fake; jobs; ignore_constraints_on; unlock_base;
+    locked; lock_suffix
+  }
 
 let apply_build_options b =
   let flag f = if f then Some true else None in
+  let mflag f = if f = Inactive then None else Some f in
   OpamRepositoryConfig.update
     (* ?download_tool:(OpamTypes.arg list * dl_tool_kind) Lazy.t *)
     (* ?retries:int *)
@@ -187,8 +196,8 @@ let apply_build_options b =
     ?jobs:OpamStd.Option.Op.(b.jobs >>| fun j -> lazy j)
     (* ?dl_jobs:int *)
     (* ?no_base_packages:(flag o.no_base_packages) -- handled globally *)
-    ?build_test:(flag b.build_test)
-    ?build_doc:(flag b.build_doc)
+    ?build_test:(mflag b.build_test)
+    ?build_doc:(mflag b.build_doc)
     ?dryrun:(flag b.dryrun)
     ?makecmd:OpamStd.Option.Op.(b.make >>| fun m -> lazy m)
     ?ignore_constraints_on:
@@ -1093,6 +1102,10 @@ let build_options =
     mk_flag ~section ["require-checksums"]
       "Reject the installation of packages that don't provide a checksum for the upstream archives. \
        This is equivalent to setting $(b,\\$OPAMREQUIRECHECKSUMS) to \"true\"." in
+  let recursive_flag =
+    mk_flag ~section ["recursive-with"]
+      "Apply with-test and with-doc to all dependencies."
+  in
   let build_test =
     mk_flag ~section ["t";"with-test";"build-test"]
       "Build and $(b,run) the package unit-tests. This only affects packages \
@@ -1150,7 +1163,8 @@ let build_options =
   let lock_suffix = lock_suffix section in
   Term.(const create_build_options
     $keep_build_dir $reuse_build_dir $inplace_build $make
-    $no_checksums $req_checksums $build_test $build_doc $show $dryrun
+    $no_checksums $req_checksums $recursive_flag $build_test $build_doc
+    $show $dryrun
     $skip_update $fake $jobs_flag $ignore_constraints_on
     $unlock_base $locked $lock_suffix)
 
@@ -1276,7 +1290,8 @@ let package_selection =
   in
   let filter
       depends_on required_by conflicts_with coinstallable_with resolve recursive
-      depopts nobuild post dev doc_flag test field_match has_flag has_tag
+      depopts nobuild post dev
+      doc_flag test field_match has_flag has_tag
     =
     let dependency_toggles = {
       OpamListCommand.
@@ -1309,8 +1324,8 @@ let package_selection =
   in
   Term.(const filter $
         depends_on $ required_by $ conflicts_with $ coinstallable_with $
-        resolve $ recursive $ depopts $ nobuild $ post $ dev $ doc_flag $
-        test $ field_match $ has_flag $ has_tag)
+        resolve $ recursive $ depopts $ nobuild $ post $ dev $
+        doc_flag $ test $ field_match $ has_flag $ has_tag)
 
 let package_listing_section = "OUTPUT FORMAT OPTIONS"
 
